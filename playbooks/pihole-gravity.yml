@@ -1,0 +1,5 @@
+- name: Update pihole gravity
+  hosts: "pihole"
+  tasks:
+  - name: pihole update gravity
+    shell: pihole updateGravity
