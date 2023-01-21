@@ -3,9 +3,9 @@
   serial: 1
   tasks:
     - name: Mark node {{ ansible_hostname }} as unschedulable.
-      shell: kubectl cordon {{ ansible_hostname }}
+      shell: kubectl --kubeconfig /home/ansible_user/.kube/config cordon {{ ansible_hostname }}
     - name: Drain node {{ ansible_hostname }}, even if there are pods not managed by a ReplicationController, Job, or DaemonSet on it.
-      shell: kubectl drain --ignore-daemonsets --delete-emptydir-data {{ ansible_hostname }}
+      shell: kubectl --kubeconfig /home/ansible_user/.kube/config drain --ignore-daemonsets --delete-emptydir-data {{ ansible_hostname }}
     - name: Reboot kubernetes one at a time
       reboot:
         msg: "Reboot initiated by Ansible"
@@ -18,4 +18,4 @@
       ansible.builtin.pause:
         seconds: 30
     - name: Mark node {{ ansible_hostname }} as schedulable.
-      shell: kubectl uncordon {{ ansible_hostname }}
+      shell: kubectl --kubeconfig /home/ansible_user/.kube/config uncordon {{ ansible_hostname }}
