@@ -1,0 +1,31 @@
+- hosts: "kubernetes"
+  become: yes
+  serial: 1
+  tasks:
+    - name: Mark node {{ ansible_hostname }} as unschedulable.
+      shell: kubectl --kubeconfig /home/ansible_user/.kube/config cordon {{ ansible_hostname }}
+    - name: Drain node {{ ansible_hostname }}, even if there are pods not managed by a ReplicationController, Job, or DaemonSet on it.
+      shell: kubectl --kubeconfig /home/ansible_user/.kube/config drain --ignore-daemonsets --delete-emptydir-data {{ ansible_hostname }}
+    - name: Update server {{ ansible_hostname }}
+      apt:
+        update_cache: yes
+        upgrade: 'yes'
+    - name: Check if reboot is required on {{ ansible_hostname }}
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+    - name: Reboot {{ ansible_hostname }}
+      reboot:
+        msg: "Reboot initiated by Ansible"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: whoami
+      when: reboot_required.stat.exists
+    - name: Pause for 30 second to allow server to start everything
+      ansible.builtin.pause:
+        seconds: 30
+      when: reboot_required.stat.exists
+    - name: Mark node {{ ansible_hostname }} as schedulable.
+      shell: kubectl --kubeconfig /home/ansible_user/.kube/config uncordon {{ ansible_hostname }}
