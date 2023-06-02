@@ -1,4 +1,4 @@
-- hosts: "*"
+- hosts: "*,!kubernetes"
   become: yes
   tasks:
     - name: apt
