@@ -1,4 +1,5 @@
-- hosts: "kubernetes"
+- name: "Updating kubernetes servers and rebooting if required"
+  hosts: "kubernetes"
   become: yes
   serial: 1
   tasks:
